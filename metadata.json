@@ -1,0 +1,7 @@
+{
+  "name": "Origo",
+  "description": "Track your sunlight exposure to nurture and grow your digital origami crane. Features interactive desk play, sunlight statistics, and pet growth tracking.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
