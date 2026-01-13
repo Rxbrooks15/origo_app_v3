@@ -1,10 +1,11 @@
 
 import React, { useState } from 'react';
-import { OrigamiStats } from '../types';
+import { OrigamiStats, CustomizationSettings } from '../types';
 import { COLORS, PaperAirplaneSVG, CrumpledBallSVG } from '../constants';
 
 interface ProfileViewProps {
   origami: OrigamiStats;
+  customization: CustomizationSettings;
 }
 
 const RadarChart = ({ data }: { data: { label: string; value: number }[] }) => {
@@ -77,7 +78,7 @@ const RadarChart = ({ data }: { data: { label: string; value: number }[] }) => {
   );
 };
 
-const ProfileView: React.FC<ProfileViewProps> = ({ origami }) => {
+const ProfileView: React.FC<ProfileViewProps> = ({ origami, customization }) => {
   const [activeSubTab, setActiveSubTab] = useState<'about' | 'personality'>('about');
 
   const personalityData = [
@@ -108,7 +109,12 @@ const ProfileView: React.FC<ProfileViewProps> = ({ origami }) => {
         <div className="flex gap-8 items-center mb-8">
           <div className="w-24 h-24 bg-[#FFC107]/10 rounded-3xl flex items-center justify-center p-2 border border-[#FFC107]/20 shadow-inner">
              {origami.health > 0 ? (
-               <PaperAirplaneSVG className="w-full h-full -rotate-12" health={origami.health} />
+               <PaperAirplaneSVG 
+                className="w-full h-full -rotate-12" 
+                health={origami.health} 
+                mainColor={customization.origamiColor}
+                designId={customization.designId}
+               />
              ) : (
                <CrumpledBallSVG className="w-full h-full grayscale" />
              )}
@@ -116,7 +122,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ origami }) => {
           <div>
             <h1 className="text-2xl font-black text-[#3A215D] mb-1">{origami.name}</h1>
             <p className="text-[#E65100] font-black text-[10px] uppercase tracking-widest">
-              {origami.health > 0 ? 'Mk. 2.5 Cruiser' : 'Crumpled Sheet'}
+              {origami.health > 0 ? `Mk. 2.5 ${customization.designId.toUpperCase()}` : 'Crumpled Sheet'}
             </p>
           </div>
         </div>

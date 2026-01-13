@@ -11,6 +11,7 @@ interface HomeViewProps {
   activeOrigami: OrigamiStats;
   currencies: CurrencyStats;
   customization: CustomizationSettings;
+  showLevelUpAnimation?: boolean;
 }
 
 type RealisticDeskLampProps = {
@@ -27,7 +28,7 @@ const RealisticDeskLamp: React.FC<RealisticDeskLampProps> = ({
   className = "",
 }) => {
   const glow = lampOn
-    ? "drop-shadow(0 0 18px rgba(255,245,180,0.85)) drop-shadow(0 0 55px rgba(255,245,180,0.35))"
+    ? "drop-shadow(0 0 25px rgba(255,245,180,1)) drop-shadow(0 0 80px rgba(255,245,180,0.6))"
     : "none";
 
   return (
@@ -40,16 +41,25 @@ const RealisticDeskLamp: React.FC<RealisticDeskLampProps> = ({
       onClick={onToggle}
       role="button"
     >
+      {/* Light Beam - Much more pronounced */}
       {lampOn && (
         <div
-          className="absolute left-[-40px] top-[98px] w-[270px] h-[380px] -z-10 blur-[0.5px]"
+          className="absolute left-[-150px] top-[95px] w-[500px] h-[600px] -z-10 opacity-70 blur-[4px] pointer-events-none transition-all duration-500"
           style={{
-            clipPath: "polygon(52% 0%, 0% 100%, 100% 100%)",
+            clipPath: "polygon(50% 0%, 0% 100%, 100% 100%)",
             background:
-              "linear-gradient(to bottom, rgba(255,255,255,0.28), rgba(255,255,255,0.06) 45%, rgba(255,255,255,0))",
+              "linear-gradient(to bottom, rgba(255,255,230,0.6), rgba(255,255,210,0.2) 35%, rgba(255,255,200,0.05) 75%, rgba(255,255,200,0))",
           }}
         />
       )}
+      
+      {/* Surface Glow on Desk */}
+      {lampOn && (
+        <div 
+          className="absolute bottom-[-100px] left-[-300px] w-[600px] h-[300px] bg-yellow-200/20 blur-[80px] -z-20 pointer-events-none"
+        />
+      )}
+
       <div className="absolute bottom-3 left-[92px] w-[120px] h-[34px]">
         <div className="absolute inset-x-2 bottom-[-10px] h-[16px] rounded-full bg-black/35 blur-md" />
         <div
@@ -123,7 +133,8 @@ const RealisticDeskLamp: React.FC<RealisticDeskLampProps> = ({
 
 const HomeView: React.FC<HomeViewProps> = ({ 
   lampOn, setLampOn, underLamp, setUnderLamp, 
-  activeOrigami, currencies, customization 
+  activeOrigami, currencies, customization,
+  showLevelUpAnimation
 }) => {
   const [foldMode, setFoldMode] = useState<'LOCKBIND' | 'MANIFOLD'>('LOCKBIND');
 
@@ -142,9 +153,29 @@ const HomeView: React.FC<HomeViewProps> = ({
 
   return (
     <div className="h-full flex flex-col relative overflow-hidden transition-colors duration-1000">
+      {/* Level Up Overlay */}
+      {showLevelUpAnimation && (
+        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center pointer-events-none">
+          <div className="animate-bounce bg-white/90 backdrop-blur-xl px-10 py-6 rounded-[40px] shadow-2xl border-4 border-cyan-400">
+            <h2 className="text-4xl font-black text-cyan-500 uppercase tracking-tighter italic">LEVEL UP!</h2>
+            <p className="text-center font-black text-[#3A215D] text-lg">LEVEL {activeOrigami.level}</p>
+          </div>
+          {[...Array(20)].map((_, i) => (
+            <div 
+              key={i}
+              className="absolute w-4 h-4 bg-cyan-400 rounded-full animate-ping"
+              style={{ 
+                top: `${Math.random()*100}%`, 
+                left: `${Math.random()*100}%`,
+                animationDelay: `${Math.random()*2}s`
+              }}
+            />
+          ))}
+        </div>
+      )}
+
       <div className="absolute inset-0 z-0" style={{ backgroundColor: activeTheme.bg }}>
-        
-        {/* Wall Light Switch - Moved 20px more to the right (right-[18px] -> right-[-2px]) */}
+        {/* Wall Light Switch */}
         <div className="absolute top-1/2 right-[-2px] -translate-y-1/2 flex flex-col items-center gap-1 z-20">
           <div 
             onClick={() => setLampOn(!lampOn)}
@@ -198,7 +229,6 @@ const HomeView: React.FC<HomeViewProps> = ({
 
       <div className="absolute bottom-0 left-0 right-0 h-1/3 border-t-8 z-10 p-6 shadow-2xl transition-colors" style={{ backgroundColor: activeTheme.desk, borderColor: activeTheme.shelf }}>
         <div className="relative h-full">
-          
           <RealisticDeskLamp 
             lampOn={lampOn} 
             onToggle={() => setLampOn(!lampOn)} 
@@ -217,11 +247,17 @@ const HomeView: React.FC<HomeViewProps> = ({
                 {activeOrigami.name}: {Math.round(activeOrigami.health)}%
               </div>
               {activeOrigami.health > 0 ? (
-                <PaperAirplaneSVG className="w-40 h-40" health={activeOrigami.health} mainColor={customization.origamiColor} />
+                <PaperAirplaneSVG 
+                  className="w-40 h-40" 
+                  health={activeOrigami.health} 
+                  mainColor={customization.origamiColor}
+                  designId={customization.designId}
+                />
               ) : (
                 <CrumpledBallSVG className="w-40 h-40 grayscale opacity-80" />
               )}
-              <div className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-24 h-6 bg-black/20 blur-md rounded-full -z-10 transition-transform duration-700 ${underLamp ? 'scale-125 opacity-100' : 'scale-100 opacity-60'}`} />
+              {/* Enhanced shadow when under lamp */}
+              <div className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-24 h-6 bg-black/20 blur-md rounded-full -z-10 transition-transform duration-700 ${underLamp ? 'scale-[1.8] opacity-100' : 'scale-100 opacity-60'}`} />
             </div>
           </div>
         </div>
@@ -243,7 +279,27 @@ const HomeView: React.FC<HomeViewProps> = ({
             </div>
           </div>
 
-          <div className="flex gap-2 pointer-events-auto">
+          <div className="flex flex-col items-end gap-3 pointer-events-auto">
+            {/* Level Counter */}
+            <div className="flex flex-col items-end">
+              <div className="bg-white/90 backdrop-blur-md px-5 py-2 rounded-3xl border-2 border-cyan-400 shadow-xl flex items-center gap-3">
+                 <div className="flex flex-col items-end">
+                    <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Aero Rank</span>
+                    <span className="text-xl font-black text-[#3A215D] tracking-tighter">LVL {activeOrigami.level}</span>
+                 </div>
+                 <div className="w-10 h-10 rounded-2xl bg-cyan-400 flex items-center justify-center text-white text-xl font-black">
+                   {activeOrigami.level}
+                 </div>
+              </div>
+              {/* XP Progress Bar */}
+              <div className="mt-2 w-40 h-2 bg-white/40 rounded-full overflow-hidden border border-white/20">
+                 <div 
+                  className="h-full bg-cyan-400 transition-all duration-1000" 
+                  style={{ width: `${(activeOrigami.experience / activeOrigami.xpToNextLevel) * 100}%` }}
+                 />
+              </div>
+            </div>
+
             <button 
               onClick={activeOrigami.health > 50 ? toggleFoldMode : undefined}
               className="bg-[#3A215D] px-4 py-2 rounded-full shadow-lg text-xs font-black text-white hover:scale-105 active:scale-95 transition-transform cursor-pointer h-10 flex items-center justify-center"

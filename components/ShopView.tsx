@@ -10,7 +10,7 @@ interface ShopViewProps {
 }
 
 const ShopView: React.FC<ShopViewProps> = ({ customization, setCustomization, currencies, setCurrencies }) => {
-  const [activeCategory, setActiveCategory] = useState<'Colors' | 'Furniture' | 'Themes'>('Colors');
+  const [activeCategory, setActiveCategory] = useState<'Colors' | 'Designs' | 'Furniture' | 'Themes'>('Colors');
 
   const shopItems = {
     Colors: [
@@ -21,6 +21,12 @@ const ShopView: React.FC<ShopViewProps> = ({ customization, setCustomization, cu
       { id: 'l1', name: 'Matte Black', type: 'lamp', val: '#333333', price: 0 },
       { id: 'l2', name: 'Ruby Red', type: 'lamp', val: '#B71C1C', price: 300 },
       { id: 'l3', name: 'Emerald', type: 'lamp', val: '#1B5E20', price: 300 },
+    ],
+    Designs: [
+      { id: 'plain', name: 'Clean Sheet', icon: '📄', price: 0, rarity: 'Common' },
+      { id: 'zebra', name: 'Zebra Wild', icon: '🦓', price: 800, rarity: 'Rare' },
+      { id: 'tiger', name: 'Tiger Soul', icon: '🐯', price: 1200, rarity: 'Rare' },
+      { id: 'crocodile', name: 'Croc Scale', icon: '🐊', price: 2500, rarity: 'Legendary' },
     ],
     Furniture: [
       { id: 'bookshelf', name: 'Classic Shelf', icon: '📚', price: 0 },
@@ -36,12 +42,19 @@ const ShopView: React.FC<ShopViewProps> = ({ customization, setCustomization, cu
   };
 
   const handlePurchase = (item: any) => {
-    if (currencies.cylite < item.price) {
+    // Check if user already has it (simplistic check)
+    const alreadyOwns = (activeCategory === 'Themes' && customization.theme === item.id) ||
+                        (activeCategory === 'Designs' && customization.designId === item.id) ||
+                        (activeCategory === 'Furniture' && customization.furniture.includes(item.id));
+
+    if (alreadyOwns) {
+        // Just select it
+    } else if (currencies.cylite < item.price) {
       alert("Not enough Cylite!");
       return;
+    } else {
+      setCurrencies(prev => ({ ...prev, cylite: prev.cylite - item.price }));
     }
-
-    setCurrencies(prev => ({ ...prev, cylite: prev.cylite - item.price }));
 
     if (activeCategory === 'Colors') {
       if (item.type === 'origami') {
@@ -49,6 +62,8 @@ const ShopView: React.FC<ShopViewProps> = ({ customization, setCustomization, cu
       } else {
         setCustomization(prev => ({ ...prev, lampColor: item.val }));
       }
+    } else if (activeCategory === 'Designs') {
+        setCustomization(prev => ({ ...prev, designId: item.id }));
     } else if (activeCategory === 'Themes') {
       setCustomization(prev => ({ ...prev, theme: item.id }));
     } else if (activeCategory === 'Furniture') {
@@ -73,7 +88,7 @@ const ShopView: React.FC<ShopViewProps> = ({ customization, setCustomization, cu
       </div>
 
       <div className="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
-        {['Colors', 'Furniture', 'Themes'].map((cat) => (
+        {['Colors', 'Designs', 'Furniture', 'Themes'].map((cat) => (
           <button
             key={cat}
             onClick={() => setActiveCategory(cat as any)}
@@ -89,6 +104,7 @@ const ShopView: React.FC<ShopViewProps> = ({ customization, setCustomization, cu
       <div className="grid grid-cols-2 gap-4">
         {shopItems[activeCategory].map((item: any) => {
           const isSelected = activeCategory === 'Themes' ? customization.theme === item.id : 
+                            activeCategory === 'Designs' ? customization.designId === item.id :
                             activeCategory === 'Colors' ? (item.type === 'origami' ? customization.origamiColor === item.val : customization.lampColor === item.val) :
                             customization.furniture.includes(item.id);
 
@@ -103,6 +119,14 @@ const ShopView: React.FC<ShopViewProps> = ({ customization, setCustomization, cu
               {isSelected && (
                 <div className="absolute top-2 right-2 w-6 h-6 bg-[#3A215D] text-white rounded-full flex items-center justify-center text-[10px]">
                    ✓
+                </div>
+              )}
+
+              {item.rarity && (
+                <div className={`absolute top-2 left-2 px-2 py-0.5 rounded-full text-[7px] font-black text-white ${
+                    item.rarity === 'Legendary' ? 'bg-orange-500' : 'bg-gray-400'
+                }`}>
+                    {item.rarity}
                 </div>
               )}
 

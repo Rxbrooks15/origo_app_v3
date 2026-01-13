@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { AppTab, OrigamiStats, SunlightData, CurrencyStats, CustomizationSettings } from './types';
 import HomeView from './components/HomeView';
 import StatsView from './components/StatsView';
@@ -12,7 +12,10 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<AppTab>(AppTab.HOME);
   const [lampOn, setLampOn] = useState(false);
   const [underLamp, setUnderLamp] = useState(false);
+  const [showLevelUp, setShowLevelUp] = useState(false);
   
+  const lastHealthRef = useRef(75);
+
   const [sunData, setSunData] = useState<SunlightData>({
     morningMinutes: 12,
     vitaminDMinutes: 5,
@@ -24,7 +27,9 @@ const App: React.FC = () => {
     sleepHours: 7.5,
     sleepGoal: 8,
     screenTime: 4.2,
-    screenTimeGoal: 6
+    screenTimeGoal: 6,
+    flightTime: 45,
+    driveTime: 22
   });
 
   const [currencies, setCurrencies] = useState<CurrencyStats>({
@@ -38,7 +43,8 @@ const App: React.FC = () => {
     origamiColor: '#F5F5F5',
     lampColor: '#333333',
     theme: 'day',
-    furniture: ['bookshelf']
+    furniture: ['bookshelf'],
+    designId: 'plain'
   });
 
   const [origami, setOrigami] = useState<OrigamiStats>({
@@ -49,37 +55,71 @@ const App: React.FC = () => {
     height: 0.5,
     wingspan: 2.0,
     health: 75,
-    streak: 1
+    streak: 1,
+    level: 1,
+    experience: 0,
+    xpToNextLevel: 100
   });
 
   // GAME LOOP: Processes per-second updates
   useEffect(() => {
     const interval = setInterval(() => {
       setOrigami(prev => {
-        // Decrease health by 1% every second
-        let healthChange = -1.0;
-
-        // Sunlight/Lamp nurture logic
+        // Lose 1% every minute (60 seconds) -> 1/60 per second
+        let healthChange = -(1 / 60); 
+        
+        // Charging logic: If under lamp, increase health by 1% per second
         if (lampOn && underLamp) {
-          // If under lamp, increase health by 2 (net +1)
           healthChange = +1.0;
         }
 
         const newHealth = Math.max(0, Math.min(100, prev.health + healthChange));
+        let newXp = prev.experience;
+        let newLevel = prev.level;
+        let newXpToNext = prev.xpToNextLevel;
+
+        // Level Up Logic: When health hits 100 for the first time in this "session"
+        if (newHealth >= 100 && lastHealthRef.current < 100) {
+          // Grant XP - 50 base XP
+          newXp += 50;
+          
+          // Check for level up
+          if (newXp >= newXpToNext) {
+            newLevel += 1;
+            newXp -= newXpToNext;
+            // Scale difficulty: Next level requires 25% more XP
+            newXpToNext = Math.floor(newXpToNext * 1.25);
+            setShowLevelUp(true);
+            setTimeout(() => setShowLevelUp(false), 3000);
+          }
+        }
+
+        lastHealthRef.current = newHealth;
         
         return {
           ...prev,
           health: newHealth,
-          // If health is 0, weight stops increasing as it's just a ball
+          experience: newXp,
+          level: newLevel,
+          xpToNextLevel: newXpToNext,
           weight: newHealth > 0 ? +(prev.weight + 0.001).toFixed(3) : prev.weight
         };
       });
 
-      // Handle passive currency generation only if paper is alive
-      setCurrencies(prev => ({
-        ...prev,
-        cylite: prev.cylite + (origami.health > 0 ? 1 : 0)
-      }));
+      setCurrencies(prev => {
+        // Normal gain if healthy
+        let cyliteChange = (origami.health > 0 ? 1 : 0);
+        
+        // Cost mechanism: Charge for the light usage
+        if (lampOn && underLamp) {
+          cyliteChange = -10;
+        }
+
+        return {
+          ...prev,
+          cylite: Math.max(0, prev.cylite + cyliteChange)
+        };
+      });
     }, 1000);
 
     return () => clearInterval(interval);
@@ -97,6 +137,7 @@ const App: React.FC = () => {
             activeOrigami={origami}
             currencies={currencies}
             customization={customization}
+            showLevelUpAnimation={showLevelUp}
           />
         );
       case AppTab.STATS:
@@ -106,7 +147,7 @@ const App: React.FC = () => {
       case AppTab.SHOP:
         return <ShopView customization={customization} setCustomization={setCustomization} currencies={currencies} setCurrencies={setCurrencies} />;
       case AppTab.PROFILE:
-        return <ProfileView origami={origami} />;
+        return <ProfileView origami={origami} customization={customization} />;
       default:
         return <HomeView 
           lampOn={lampOn} 
@@ -116,6 +157,7 @@ const App: React.FC = () => {
           activeOrigami={origami}
           currencies={currencies} 
           customization={customization} 
+          showLevelUpAnimation={showLevelUp}
         />;
     }
   };

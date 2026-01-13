@@ -16,6 +16,9 @@ export interface OrigamiStats {
   wingspan: number;
   health: number; // 0-100
   streak: number;
+  level: number;
+  experience: number;
+  xpToNextLevel: number;
 }
 
 export interface SunlightData {
@@ -28,8 +31,10 @@ export interface SunlightData {
   stepGoal: number;
   sleepHours: number;
   sleepGoal: number;
-  screenTime: number; // Updated from focusHours
-  screenTimeGoal: number; // Updated from focusGoal
+  screenTime: number;
+  screenTimeGoal: number;
+  flightTime: number; // in minutes
+  driveTime: number; // in minutes
 }
 
 export interface CurrencyStats {
@@ -48,6 +53,7 @@ export interface SharedModel {
   lift: number;
   creator: string;
   mainColor: string;
+  designId?: string;
 }
 
 export interface CustomizationSettings {
@@ -55,4 +61,5 @@ export interface CustomizationSettings {
   lampColor: string;
   theme: 'day' | 'night' | 'sunset' | 'cyber';
   furniture: string[];
+  designId: string;
 }

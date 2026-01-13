@@ -20,7 +20,9 @@ const StatsView: React.FC<StatsViewProps> = ({ sunData, setSunData }) => {
       setSunData(prev => ({
         ...prev,
         steps: prev.steps + 1200,
-        screenTime: prev.screenTime + 0.8
+        screenTime: prev.screenTime + 0.8,
+        flightTime: prev.flightTime + 15,
+        driveTime: prev.driveTime + 10
       }));
     }, 1500);
   };
@@ -157,6 +159,26 @@ const StatsView: React.FC<StatsViewProps> = ({ sunData, setSunData }) => {
              <div className="h-full bg-[#A8BBA2]" style={{ width: `${(sunData.screenTime/sunData.screenTimeGoal)*100}%` }} />
           </div>
         </div>
+
+        {/* Flight Time Card */}
+        <div className="bg-white rounded-[40px] p-6 shadow-xl border border-white flex flex-col items-center">
+          <div className="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center text-2xl mb-4">✈️</div>
+          <p className="text-[9px] font-black text-purple-400 uppercase tracking-widest mb-1">Flight Time</p>
+          <h4 className="text-xl font-black text-[#3A215D]">{sunData.flightTime}m</h4>
+          <div className="w-full h-1 bg-gray-100 rounded-full mt-4 overflow-hidden">
+             <div className="h-full bg-purple-400" style={{ width: `${Math.min(100, (sunData.flightTime/60)*100)}%` }} />
+          </div>
+        </div>
+
+        {/* Drive Time Card */}
+        <div className="bg-white rounded-[40px] p-6 shadow-xl border border-white flex flex-col items-center">
+          <div className="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center text-2xl mb-4">🚗</div>
+          <p className="text-[9px] font-black text-orange-400 uppercase tracking-widest mb-1">Drive Time</p>
+          <h4 className="text-xl font-black text-[#3A215D]">{sunData.driveTime}m</h4>
+          <div className="w-full h-1 bg-gray-100 rounded-full mt-4 overflow-hidden">
+             <div className="h-full bg-orange-400" style={{ width: `${Math.min(100, (sunData.driveTime/60)*100)}%` }} />
+          </div>
+        </div>
       </div>
 
       {/* Breakdown Breakdown */}
@@ -165,7 +187,9 @@ const StatsView: React.FC<StatsViewProps> = ({ sunData, setSunData }) => {
          {[
            { label: 'Morning Light', val: '12m', icon: '🌅', color: '#fbbf24' },
            { label: 'Screen Usage', val: `${sunData.screenTime}h`, icon: '📉', color: '#A8BBA2' },
-           { label: 'Step Activity', val: `${(sunData.steps / 1000).toFixed(1)}k`, icon: '⚡', color: '#60a5fa' }
+           { label: 'Step Activity', val: `${(sunData.steps / 1000).toFixed(1)}k`, icon: '⚡', color: '#60a5fa' },
+           { label: 'Flight Logs', val: `${sunData.flightTime}m`, icon: '☁️', color: '#a855f7' },
+           { label: 'Drive Logs', val: `${sunData.driveTime}m`, icon: '🛣️', color: '#fb923c' }
          ].map((item, i) => (
            <div key={i} className="bg-white p-4 rounded-3xl flex justify-between items-center shadow-sm border border-gray-50 hover:scale-[1.02] transition-transform">
              <div className="flex items-center gap-4">
