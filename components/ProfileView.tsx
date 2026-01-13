@@ -6,6 +6,7 @@ import { COLORS, PaperAirplaneSVG, CrumpledBallSVG } from '../constants';
 interface ProfileViewProps {
   origami: OrigamiStats;
   customization: CustomizationSettings;
+  openSettings: () => void;
 }
 
 const RadarChart = ({ data }: { data: { label: string; value: number }[] }) => {
@@ -78,7 +79,7 @@ const RadarChart = ({ data }: { data: { label: string; value: number }[] }) => {
   );
 };
 
-const ProfileView: React.FC<ProfileViewProps> = ({ origami, customization }) => {
+const ProfileView: React.FC<ProfileViewProps> = ({ origami, customization, openSettings }) => {
   const [activeSubTab, setActiveSubTab] = useState<'about' | 'personality'>('about');
 
   const personalityData = [
@@ -92,7 +93,12 @@ const ProfileView: React.FC<ProfileViewProps> = ({ origami, customization }) => 
   return (
     <div className="min-h-full bg-[#FFECB3] p-6 pb-20">
       <div className="flex justify-between items-center mb-6">
-        <button className="w-12 h-12 bg-white/60 rounded-xl flex items-center justify-center text-2xl shadow-sm">☰</button>
+        <button 
+          onClick={openSettings}
+          className="w-12 h-12 bg-white/60 rounded-xl flex items-center justify-center text-2xl shadow-sm hover:scale-105 active:scale-95 transition-transform"
+        >
+          ☰
+        </button>
         <div className="px-4 py-2 bg-[#3A215D] text-white rounded-xl font-black text-[10px] uppercase tracking-widest">
           {origami.name}
         </div>
@@ -187,7 +193,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ origami, customization }) => 
             activeSubTab === 'about' ? 'bg-white text-[#3A215D] shadow-md' : 'text-gray-400'
           }`}
         >
-          DOSSIER
+          ABOUT
         </button>
         <button 
           onClick={() => setActiveSubTab('personality')}
@@ -195,7 +201,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ origami, customization }) => 
             activeSubTab === 'personality' ? 'bg-white text-[#3A215D] shadow-md' : 'text-gray-400'
           }`}
         >
-          TELEMETRY
+          PERSONALITY
         </button>
       </div>
 

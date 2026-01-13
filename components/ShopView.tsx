@@ -7,9 +7,10 @@ interface ShopViewProps {
   setCustomization: React.Dispatch<React.SetStateAction<CustomizationSettings>>;
   currencies: CurrencyStats;
   setCurrencies: React.Dispatch<React.SetStateAction<CurrencyStats>>;
+  openSettings: () => void;
 }
 
-const ShopView: React.FC<ShopViewProps> = ({ customization, setCustomization, currencies, setCurrencies }) => {
+const ShopView: React.FC<ShopViewProps> = ({ customization, setCustomization, currencies, setCurrencies, openSettings }) => {
   const [activeCategory, setActiveCategory] = useState<'Colors' | 'Designs' | 'Furniture' | 'Themes'>('Colors');
 
   const shopItems = {
@@ -42,13 +43,11 @@ const ShopView: React.FC<ShopViewProps> = ({ customization, setCustomization, cu
   };
 
   const handlePurchase = (item: any) => {
-    // Check if user already has it (simplistic check)
     const alreadyOwns = (activeCategory === 'Themes' && customization.theme === item.id) ||
                         (activeCategory === 'Designs' && customization.designId === item.id) ||
                         (activeCategory === 'Furniture' && customization.furniture.includes(item.id));
 
     if (alreadyOwns) {
-        // Just select it
     } else if (currencies.cylite < item.price) {
       alert("Not enough Cylite!");
       return;
@@ -76,8 +75,14 @@ const ShopView: React.FC<ShopViewProps> = ({ customization, setCustomization, cu
 
   return (
     <div className="min-h-full bg-[#f9fbf9] p-6 pb-32">
-      <div className="flex justify-between items-center mb-8 pt-6">
-        <div>
+      <div className="flex items-center gap-4 mb-8 pt-6">
+        <button 
+          onClick={openSettings}
+          className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-2xl shadow-lg border border-gray-50 active:scale-90 transition-transform"
+        >
+          ☰
+        </button>
+        <div className="flex-1">
           <h1 className="text-3xl font-black text-[#3A215D] tracking-tighter">Aero Shop</h1>
           <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Upgrade your hangar</p>
         </div>

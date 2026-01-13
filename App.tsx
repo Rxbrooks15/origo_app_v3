@@ -6,6 +6,7 @@ import StatsView from './components/StatsView';
 import GalleryView from './components/GalleryView';
 import ShopView from './components/ShopView';
 import ProfileView from './components/ProfileView';
+import SettingsView from './components/SettingsView';
 import BottomNav from './components/BottomNav';
 
 const App: React.FC = () => {
@@ -13,6 +14,7 @@ const App: React.FC = () => {
   const [lampOn, setLampOn] = useState(false);
   const [underLamp, setUnderLamp] = useState(false);
   const [showLevelUp, setShowLevelUp] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   
   const lastHealthRef = useRef(75);
 
@@ -61,41 +63,29 @@ const App: React.FC = () => {
     xpToNextLevel: 100
   });
 
-  // GAME LOOP: Processes per-second updates
   useEffect(() => {
     const interval = setInterval(() => {
       setOrigami(prev => {
-        // Lose 1% every minute (60 seconds) -> 1/60 per second
         let healthChange = -(1 / 60); 
-        
-        // Charging logic: If under lamp, increase health by 1% per second
         if (lampOn && underLamp) {
           healthChange = +1.0;
         }
-
         const newHealth = Math.max(0, Math.min(100, prev.health + healthChange));
         let newXp = prev.experience;
         let newLevel = prev.level;
         let newXpToNext = prev.xpToNextLevel;
 
-        // Level Up Logic: When health hits 100 for the first time in this "session"
         if (newHealth >= 100 && lastHealthRef.current < 100) {
-          // Grant XP - 50 base XP
           newXp += 50;
-          
-          // Check for level up
           if (newXp >= newXpToNext) {
             newLevel += 1;
             newXp -= newXpToNext;
-            // Scale difficulty: Next level requires 25% more XP
             newXpToNext = Math.floor(newXpToNext * 1.25);
             setShowLevelUp(true);
             setTimeout(() => setShowLevelUp(false), 3000);
           }
         }
-
         lastHealthRef.current = newHealth;
-        
         return {
           ...prev,
           health: newHealth,
@@ -107,14 +97,10 @@ const App: React.FC = () => {
       });
 
       setCurrencies(prev => {
-        // Normal gain if healthy
         let cyliteChange = (origami.health > 0 ? 1 : 0);
-        
-        // Cost mechanism: Charge for the light usage
         if (lampOn && underLamp) {
           cyliteChange = -10;
         }
-
         return {
           ...prev,
           cylite: Math.max(0, prev.cylite + cyliteChange)
@@ -125,7 +111,13 @@ const App: React.FC = () => {
     return () => clearInterval(interval);
   }, [lampOn, underLamp, origami.health]);
 
+  const openSettings = () => setShowSettings(true);
+
   const renderContent = () => {
+    if (showSettings) {
+      return <SettingsView onBack={() => setShowSettings(false)} />;
+    }
+
     switch (activeTab) {
       case AppTab.HOME:
         return (
@@ -138,16 +130,17 @@ const App: React.FC = () => {
             currencies={currencies}
             customization={customization}
             showLevelUpAnimation={showLevelUp}
+            openSettings={openSettings}
           />
         );
       case AppTab.STATS:
-        return <StatsView sunData={sunData} setSunData={setSunData} />;
+        return <StatsView sunData={sunData} setSunData={setSunData} openSettings={openSettings} />;
       case AppTab.GALLERY:
-        return <GalleryView />;
+        return <GalleryView openSettings={openSettings} />;
       case AppTab.SHOP:
-        return <ShopView customization={customization} setCustomization={setCustomization} currencies={currencies} setCurrencies={setCurrencies} />;
+        return <ShopView customization={customization} setCustomization={setCustomization} currencies={currencies} setCurrencies={setCurrencies} openSettings={openSettings} />;
       case AppTab.PROFILE:
-        return <ProfileView origami={origami} customization={customization} />;
+        return <ProfileView origami={origami} customization={customization} openSettings={openSettings} />;
       default:
         return <HomeView 
           lampOn={lampOn} 
@@ -158,6 +151,7 @@ const App: React.FC = () => {
           currencies={currencies} 
           customization={customization} 
           showLevelUpAnimation={showLevelUp}
+          openSettings={openSettings}
         />;
     }
   };

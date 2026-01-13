@@ -3,7 +3,11 @@ import React, { useState } from 'react';
 import { SharedModel } from '../types';
 import { PaperAirplaneSVG, COLORS } from '../constants';
 
-const GalleryView: React.FC = () => {
+interface GalleryViewProps {
+  openSettings: () => void;
+}
+
+const GalleryView: React.FC<GalleryViewProps> = ({ openSettings }) => {
   const [activeSubTab, setActiveSubTab] = useState<'community' | 'mine'>('community');
   
   const mockModels: SharedModel[] = [
@@ -17,18 +21,22 @@ const GalleryView: React.FC = () => {
 
   return (
     <div className="min-h-full bg-[#f9fbf9] p-6 pb-32">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-8 pt-6">
-        <div>
-          <h1 className="text-3xl font-black text-[#3A215D] tracking-tighter">Aero Shared</h1>
-          <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mt-1">Global Hangar Feed</p>
+      <div className="flex items-center gap-4 mb-8 pt-6">
+        <button 
+          onClick={openSettings}
+          className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-2xl shadow-lg border border-gray-50 active:scale-90 transition-transform"
+        >
+          ☰
+        </button>
+        <div className="flex-1">
+          <h1 className="text-3xl font-black text-[#3A215D] tracking-tighter uppercase">Aero Shared</h1>
+          <p className="text-[10px] font-black text-[#A8BBA2] uppercase tracking-[0.2em] mt-1">Global Hangar Feed</p>
         </div>
         <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-lg text-xl border border-gray-100">
            🌍
         </div>
       </div>
 
-      {/* Tab Selector */}
       <div className="bg-gray-100 p-1.5 rounded-[24px] flex mb-8 border border-white">
         <button 
           onClick={() => setActiveSubTab('community')}
@@ -48,73 +56,80 @@ const GalleryView: React.FC = () => {
         </button>
       </div>
 
-      {/* Grid of shared models */}
       <div className="grid grid-cols-1 gap-6">
-        {(activeSubTab === 'community' ? mockModels : []).map((model) => (
-          <div 
-            key={model.id} 
-            className="bg-white rounded-[40px] p-6 shadow-xl border border-white relative overflow-hidden group hover:scale-[1.02] transition-transform duration-300 active:scale-95"
-          >
-            {/* Rarity Tag */}
-            <div className={`absolute top-6 right-6 px-3 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest text-white shadow-lg ${
-              model.rarity === 'Legendary' ? 'bg-gradient-to-r from-yellow-400 to-orange-500' :
-              model.rarity === 'Rare' ? 'bg-[#5F8089]' :
-              model.rarity === 'Limited' ? 'bg-[#D81B60]' : 'bg-gray-400'
-            }`}>
-              {model.rarity}
-            </div>
+        {(activeSubTab === 'community' ? mockModels : []).map((model) => {
+          // Semi-random logic to give some planes the 95%+ health "glow"
+          // We use the ID to keep it deterministic for the session but look varied
+          const displayHealth = (parseInt(model.id) % 2 === 0) ? 100 : 80;
 
-            <div className="flex gap-6 items-center">
-              {/* Model Art with custom colors */}
-              <div className="w-32 h-32 bg-gray-50 rounded-[32px] flex items-center justify-center p-4 border border-gray-100 shadow-inner group-hover:rotate-3 transition-transform">
-                <PaperAirplaneSVG mainColor={model.mainColor} className="w-full h-full drop-shadow-2xl" />
+          return (
+            <div 
+              key={model.id} 
+              className="bg-white rounded-[40px] p-6 shadow-xl border border-white relative overflow-hidden group hover:scale-[1.02] transition-transform duration-300 active:scale-95"
+            >
+              <div className={`absolute top-6 right-6 px-3 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest text-white shadow-lg z-10 ${
+                model.rarity === 'Legendary' ? 'bg-gradient-to-r from-yellow-400 to-orange-500' :
+                model.rarity === 'Rare' ? 'bg-[#5F8089]' :
+                model.rarity === 'Limited' ? 'bg-[#D81B60]' : 'bg-gray-400'
+              }`}>
+                {model.rarity}
               </div>
 
-              {/* Model Details */}
-              <div className="flex-1">
-                <h3 className="text-xl font-black text-[#3A215D] mb-1">{model.name}</h3>
-                <p className="text-[10px] font-bold text-gray-400 mb-4 uppercase">Shared by: <span className="text-[#A8BBA2]">{model.creator}</span></p>
-                
-                {/* Stats */}
-                <div className="space-y-2">
-                   {[
-                     { label: 'GLD', val: model.glide, color: model.mainColor },
-                     { label: 'SPD', val: model.speed, color: '#3A215D' },
-                     { label: 'LFT', val: model.lift, color: '#A8BBA2' }
-                   ].map((stat, i) => (
-                     <div key={i} className="flex items-center gap-2">
-                        <span className="text-[8px] font-black text-gray-400 w-6">{stat.label}</span>
-                        <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                           <div 
-                             className="h-full rounded-full transition-all duration-1000 delay-300" 
-                             style={{ width: `${stat.val}%`, backgroundColor: stat.color }}
-                           />
-                        </div>
-                     </div>
-                   ))}
+              <div className="flex gap-6 items-center">
+                <div className="w-32 h-32 bg-gray-50 rounded-[32px] flex items-center justify-center p-4 border border-gray-100 shadow-inner group-hover:rotate-3 transition-transform relative overflow-visible">
+                  <PaperAirplaneSVG 
+                    mainColor={model.mainColor} 
+                    health={displayHealth}
+                    className="w-full h-full drop-shadow-2xl z-0" 
+                  />
+                  {displayHealth >= 95 && (
+                    <div className="absolute inset-0 bg-cyan-400/5 rounded-full blur-2xl animate-pulse -z-10" />
+                  )}
+                </div>
+
+                <div className="flex-1">
+                  <h3 className="text-xl font-black text-[#3A215D] mb-1">{model.name}</h3>
+                  <p className="text-[10px] font-bold text-gray-400 mb-4 uppercase">Shared by: <span className="text-[#A8BBA2]">{model.creator}</span></p>
+                  
+                  <div className="space-y-2">
+                     {[
+                       { label: 'GLD', val: model.glide, color: model.mainColor },
+                       { label: 'SPD', val: model.speed, color: '#3A215D' },
+                       { label: 'LFT', val: model.lift, color: '#A8BBA2' }
+                     ].map((stat, i) => (
+                       <div key={i} className="flex items-center gap-2">
+                          <span className="text-[8px] font-black text-gray-400 w-6">{stat.label}</span>
+                          <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                             <div 
+                               className="h-full rounded-full transition-all duration-1000 delay-300" 
+                               style={{ width: `${stat.val}%`, backgroundColor: stat.color }}
+                             />
+                          </div>
+                       </div>
+                     ))}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Interactions */}
-            <div className="mt-6 pt-6 border-t border-gray-50 flex justify-between items-center">
-               <div className="flex items-center gap-4">
-                  <button className="flex items-center gap-1.5 text-pink-500 group/heart">
-                    <span className="text-lg transition-transform group-hover/heart:scale-125">❤️</span>
-                    <span className="text-[10px] font-black">2.4k</span>
-                  </button>
-                  <button className="flex items-center gap-1.5 text-blue-400">
-                    <span className="text-lg">💬</span>
-                    <span className="text-[10px] font-black">124</span>
-                  </button>
-               </div>
-               
-               <button className="bg-[#3A215D] text-white px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-[#3A215D]/20 hover:scale-105 active:scale-95 transition-all">
-                 View Details
-               </button>
+              <div className="mt-6 pt-6 border-t border-gray-50 flex justify-between items-center">
+                 <div className="flex items-center gap-4">
+                    <button className="flex items-center gap-1.5 text-pink-500 group/heart">
+                      <span className="text-lg transition-transform group-hover/heart:scale-125">❤️</span>
+                      <span className="text-[10px] font-black">2.4k</span>
+                    </button>
+                    <button className="flex items-center gap-1.5 text-blue-400">
+                      <span className="text-lg">💬</span>
+                      <span className="text-[10px] font-black">124</span>
+                    </button>
+                 </div>
+                 
+                 <button className="bg-[#3A215D] text-white px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-[#3A215D]/20 hover:scale-105 active:scale-95 transition-all">
+                   View Details
+                 </button>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
         
         {activeSubTab === 'mine' && (
           <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -130,7 +145,6 @@ const GalleryView: React.FC = () => {
         )}
       </div>
 
-      {/* Global Stats Banner */}
       <div className="mt-10 bg-[#3A215D] rounded-[40px] p-8 shadow-2xl relative overflow-hidden text-white">
         <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl" />
         <h4 className="text-sm font-black uppercase tracking-widest mb-4">Hangar Network</h4>

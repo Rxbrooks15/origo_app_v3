@@ -5,9 +5,10 @@ import { SunlightData } from '../types';
 interface StatsViewProps {
   sunData: SunlightData;
   setSunData: React.Dispatch<React.SetStateAction<SunlightData>>;
+  openSettings: () => void;
 }
 
-const StatsView: React.FC<StatsViewProps> = ({ sunData, setSunData }) => {
+const StatsView: React.FC<StatsViewProps> = ({ sunData, setSunData, openSettings }) => {
   const [connectionType, setConnectionType] = useState<'none' | 'apple' | 'google'>('none');
   const [isSyncing, setIsSyncing] = useState(false);
 
@@ -16,7 +17,6 @@ const StatsView: React.FC<StatsViewProps> = ({ sunData, setSunData }) => {
     setTimeout(() => {
       setConnectionType(type);
       setIsSyncing(false);
-      // Simulate data fetch on connect
       setSunData(prev => ({
         ...prev,
         steps: prev.steps + 1200,
@@ -29,9 +29,14 @@ const StatsView: React.FC<StatsViewProps> = ({ sunData, setSunData }) => {
 
   return (
     <div className="min-h-full bg-[#f9fbf9] text-[#3A4238] p-6 pb-32">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-8 pt-4">
-        <div>
+      <div className="flex items-center gap-4 mb-8 pt-4">
+        <button 
+          onClick={openSettings}
+          className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-2xl shadow-lg border border-gray-50 active:scale-90 transition-transform"
+        >
+          ☰
+        </button>
+        <div className="flex-1">
           <h1 className="text-3xl font-black text-[#3A215D] tracking-tighter uppercase">Biometrics</h1>
           <p className="text-[10px] font-black text-[#A8BBA2] uppercase tracking-[0.2em] mt-1">Hangar Telemetry v2.5</p>
         </div>
@@ -40,7 +45,6 @@ const StatsView: React.FC<StatsViewProps> = ({ sunData, setSunData }) => {
         </div>
       </div>
 
-      {/* Connectivity Hub */}
       <div className="mb-8">
         <div className={`bg-white rounded-[40px] p-6 shadow-xl border-2 transition-all duration-500 ${
           connectionType !== 'none' ? 'border-[#A8BBA2]' : 'border-white'
@@ -111,9 +115,7 @@ const StatsView: React.FC<StatsViewProps> = ({ sunData, setSunData }) => {
         </div>
       </div>
 
-      {/* Primary Metrics Grid */}
       <div className="grid grid-cols-2 gap-4 mb-8">
-        {/* Sunlight - Highlighted */}
         <div className="col-span-2 bg-white rounded-[40px] p-6 shadow-xl border border-white flex items-center justify-between group">
           <div className="flex items-center gap-6">
             <div className="w-16 h-16 bg-yellow-50 rounded-3xl flex items-center justify-center text-4xl shadow-inner group-hover:rotate-6 transition-transform">☀️</div>
@@ -140,7 +142,6 @@ const StatsView: React.FC<StatsViewProps> = ({ sunData, setSunData }) => {
           </div>
         </div>
 
-        {/* Steps Card */}
         <div className="bg-white rounded-[40px] p-6 shadow-xl border border-white flex flex-col items-center">
           <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-2xl mb-4">👟</div>
           <p className="text-[9px] font-black text-blue-400 uppercase tracking-widest mb-1">Steps</p>
@@ -150,7 +151,6 @@ const StatsView: React.FC<StatsViewProps> = ({ sunData, setSunData }) => {
           </div>
         </div>
 
-        {/* Screen Time Card */}
         <div className="bg-white rounded-[40px] p-6 shadow-xl border border-white flex flex-col items-center">
           <div className="w-12 h-12 bg-[#A8BBA2]/20 rounded-2xl flex items-center justify-center text-2xl mb-4">📱</div>
           <p className="text-[9px] font-black text-[#A8BBA2] uppercase tracking-widest mb-1">Screen Time</p>
@@ -160,7 +160,6 @@ const StatsView: React.FC<StatsViewProps> = ({ sunData, setSunData }) => {
           </div>
         </div>
 
-        {/* Flight Time Card */}
         <div className="bg-white rounded-[40px] p-6 shadow-xl border border-white flex flex-col items-center">
           <div className="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center text-2xl mb-4">✈️</div>
           <p className="text-[9px] font-black text-purple-400 uppercase tracking-widest mb-1">Flight Time</p>
@@ -170,7 +169,6 @@ const StatsView: React.FC<StatsViewProps> = ({ sunData, setSunData }) => {
           </div>
         </div>
 
-        {/* Drive Time Card */}
         <div className="bg-white rounded-[40px] p-6 shadow-xl border border-white flex flex-col items-center">
           <div className="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center text-2xl mb-4">🚗</div>
           <p className="text-[9px] font-black text-orange-400 uppercase tracking-widest mb-1">Drive Time</p>
@@ -181,7 +179,6 @@ const StatsView: React.FC<StatsViewProps> = ({ sunData, setSunData }) => {
         </div>
       </div>
 
-      {/* Breakdown Breakdown */}
       <div className="space-y-3">
          <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4">Session Breakdown</h4>
          {[
@@ -204,7 +201,6 @@ const StatsView: React.FC<StatsViewProps> = ({ sunData, setSunData }) => {
          ))}
       </div>
 
-      {/* Manual Log Button */}
       <button className="w-full mt-10 bg-[#3A215D] text-white py-5 rounded-[32px] font-black text-xs uppercase tracking-[0.2em] shadow-2xl hover:translate-y-[-2px] active:translate-y-[2px] transition-all">
         Force Cloud Sync
       </button>

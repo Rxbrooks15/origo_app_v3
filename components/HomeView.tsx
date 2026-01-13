@@ -12,6 +12,7 @@ interface HomeViewProps {
   currencies: CurrencyStats;
   customization: CustomizationSettings;
   showLevelUpAnimation?: boolean;
+  openSettings: () => void;
 }
 
 type RealisticDeskLampProps = {
@@ -41,7 +42,6 @@ const RealisticDeskLamp: React.FC<RealisticDeskLampProps> = ({
       onClick={onToggle}
       role="button"
     >
-      {/* Light Beam - Much more pronounced */}
       {lampOn && (
         <div
           className="absolute left-[-150px] top-[95px] w-[500px] h-[600px] -z-10 opacity-70 blur-[4px] pointer-events-none transition-all duration-500"
@@ -53,7 +53,6 @@ const RealisticDeskLamp: React.FC<RealisticDeskLampProps> = ({
         />
       )}
       
-      {/* Surface Glow on Desk */}
       {lampOn && (
         <div 
           className="absolute bottom-[-100px] left-[-300px] w-[600px] h-[300px] bg-yellow-200/20 blur-[80px] -z-20 pointer-events-none"
@@ -72,7 +71,6 @@ const RealisticDeskLamp: React.FC<RealisticDeskLampProps> = ({
             boxShadow: "inset 0 2px 6px rgba(255,255,255,0.08), inset 0 -8px 14px rgba(0,0,0,0.55), 0 18px 30px rgba(0,0,0,0.45)",
           }}
         />
-        <div className="absolute inset-[3px] rounded-full border border-white/10" />
       </div>
       <div className="absolute bottom-[32px] left-[142px] w-[18px] h-[170px]">
         <div className="absolute left-[7px] top-[10px] w-[10px] h-[160px] rounded-full bg-black/35 blur-[2px]" />
@@ -134,7 +132,7 @@ const RealisticDeskLamp: React.FC<RealisticDeskLampProps> = ({
 const HomeView: React.FC<HomeViewProps> = ({ 
   lampOn, setLampOn, underLamp, setUnderLamp, 
   activeOrigami, currencies, customization,
-  showLevelUpAnimation
+  showLevelUpAnimation, openSettings
 }) => {
   const [foldMode, setFoldMode] = useState<'LOCKBIND' | 'MANIFOLD'>('LOCKBIND');
 
@@ -153,7 +151,6 @@ const HomeView: React.FC<HomeViewProps> = ({
 
   return (
     <div className="h-full flex flex-col relative overflow-hidden transition-colors duration-1000">
-      {/* Level Up Overlay */}
       {showLevelUpAnimation && (
         <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center pointer-events-none">
           <div className="animate-bounce bg-white/90 backdrop-blur-xl px-10 py-6 rounded-[40px] shadow-2xl border-4 border-cyan-400">
@@ -175,7 +172,6 @@ const HomeView: React.FC<HomeViewProps> = ({
       )}
 
       <div className="absolute inset-0 z-0" style={{ backgroundColor: activeTheme.bg }}>
-        {/* Wall Light Switch */}
         <div className="absolute top-1/2 right-[-2px] -translate-y-1/2 flex flex-col items-center gap-1 z-20">
           <div 
             onClick={() => setLampOn(!lampOn)}
@@ -235,7 +231,6 @@ const HomeView: React.FC<HomeViewProps> = ({
             lampColor={customization.lampColor}
           />
 
-          {/* Interactive Active Origami */}
           <div 
             className={`absolute transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] cursor-pointer z-20 ${
               underLamp ? 'left-[45%] -translate-x-1/2 bottom-20 scale-110 -rotate-12' : 'left-4 bottom-8 scale-90 rotate-6'
@@ -256,7 +251,6 @@ const HomeView: React.FC<HomeViewProps> = ({
               ) : (
                 <CrumpledBallSVG className="w-40 h-40 grayscale opacity-80" />
               )}
-              {/* Enhanced shadow when under lamp */}
               <div className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-24 h-6 bg-black/20 blur-md rounded-full -z-10 transition-transform duration-700 ${underLamp ? 'scale-[1.8] opacity-100' : 'scale-100 opacity-60'}`} />
             </div>
           </div>
@@ -266,9 +260,17 @@ const HomeView: React.FC<HomeViewProps> = ({
       <div className="relative z-40 p-6 pt-12 pointer-events-none">
         <div className="flex justify-between items-start w-full">
           <div className="flex flex-col gap-2 pointer-events-auto">
-            <div className="bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-2xl flex items-center gap-3 shadow-lg border border-white/50">
-              <div className="w-8 h-8 rounded-xl bg-[#3A215D] text-white flex items-center justify-center text-lg font-bold">A</div>
-              <h2 className="text-[10px] font-black text-[#3A215D] leading-none uppercase tracking-tighter">Aero Studio</h2>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={openSettings}
+                className="w-10 h-10 bg-white/90 backdrop-blur-md rounded-xl flex items-center justify-center text-xl shadow-lg border border-white/50 active:scale-90 transition-transform"
+              >
+                ☰
+              </button>
+              <div className="bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-2xl flex items-center gap-3 shadow-lg border border-white/50">
+                <div className="w-8 h-8 rounded-xl bg-[#3A215D] text-white flex items-center justify-center text-lg font-bold">A</div>
+                <h2 className="text-[10px] font-black text-[#3A215D] leading-none uppercase tracking-tighter">Aero Studio</h2>
+              </div>
             </div>
             
             <div className="bg-[#1B2A1B]/60 backdrop-blur-md p-2 rounded-2xl border border-white/20 grid grid-cols-2 gap-x-3 gap-y-1.5 shadow-xl">
@@ -280,7 +282,6 @@ const HomeView: React.FC<HomeViewProps> = ({
           </div>
 
           <div className="flex flex-col items-end gap-3 pointer-events-auto">
-            {/* Level Counter */}
             <div className="flex flex-col items-end">
               <div className="bg-white/90 backdrop-blur-md px-5 py-2 rounded-3xl border-2 border-cyan-400 shadow-xl flex items-center gap-3">
                  <div className="flex flex-col items-end">
@@ -291,7 +292,6 @@ const HomeView: React.FC<HomeViewProps> = ({
                    {activeOrigami.level}
                  </div>
               </div>
-              {/* XP Progress Bar */}
               <div className="mt-2 w-40 h-2 bg-white/40 rounded-full overflow-hidden border border-white/20">
                  <div 
                   className="h-full bg-cyan-400 transition-all duration-1000" 
