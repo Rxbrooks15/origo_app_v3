@@ -22,7 +22,9 @@ const App: React.FC = () => {
     steps: 6420,
     stepGoal: 10000,
     sleepHours: 7.5,
-    sleepGoal: 8
+    sleepGoal: 8,
+    screenTime: 4.2,
+    screenTimeGoal: 6
   });
 
   const [currencies, setCurrencies] = useState<CurrencyStats>({
@@ -50,24 +52,38 @@ const App: React.FC = () => {
     streak: 1
   });
 
-  // Simple growth logic when under light
+  // GAME LOOP: Processes per-second updates
   useEffect(() => {
-    let interval: any;
-    if (lampOn && underLamp) {
-      interval = setInterval(() => {
-        setOrigami(prev => ({
+    const interval = setInterval(() => {
+      setOrigami(prev => {
+        // Decrease health by 1% every second
+        let healthChange = -1.0;
+
+        // Sunlight/Lamp nurture logic
+        if (lampOn && underLamp) {
+          // If under lamp, increase health by 2 (net +1)
+          healthChange = +1.0;
+        }
+
+        const newHealth = Math.max(0, Math.min(100, prev.health + healthChange));
+        
+        return {
           ...prev,
-          health: Math.min(100, prev.health + 0.1),
-          weight: +(prev.weight + 0.001).toFixed(3)
-        }));
-        setCurrencies(prev => ({
-          ...prev,
-          cylite: prev.cylite + 1
-        }));
-      }, 1000);
-    }
+          health: newHealth,
+          // If health is 0, weight stops increasing as it's just a ball
+          weight: newHealth > 0 ? +(prev.weight + 0.001).toFixed(3) : prev.weight
+        };
+      });
+
+      // Handle passive currency generation only if paper is alive
+      setCurrencies(prev => ({
+        ...prev,
+        cylite: prev.cylite + (origami.health > 0 ? 1 : 0)
+      }));
+    }, 1000);
+
     return () => clearInterval(interval);
-  }, [lampOn, underLamp]);
+  }, [lampOn, underLamp, origami.health]);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -84,7 +100,7 @@ const App: React.FC = () => {
           />
         );
       case AppTab.STATS:
-        return <StatsView sunData={sunData} />;
+        return <StatsView sunData={sunData} setSunData={setSunData} />;
       case AppTab.GALLERY:
         return <GalleryView />;
       case AppTab.SHOP:
@@ -105,8 +121,8 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen w-full bg-[#f9fbf9] text-[#3A4238] overflow-hidden">
-      <main className="flex-1 overflow-y-auto pb-24 relative">
+    <div className="flex flex-col h-screen w-full bg-[#f9fbf9] text-[#3A4238] overflow-hidden select-none">
+      <main className="flex-1 overflow-y-auto pb-24 relative bg-[#f9fbf9]">
         {renderContent()}
       </main>
       <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />

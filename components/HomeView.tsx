@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { PaperAirplaneSVG, COLORS } from '../constants';
+import { PaperAirplaneSVG, CrumpledBallSVG, COLORS } from '../constants';
 import { CurrencyStats, CustomizationSettings, OrigamiStats } from '../types';
 
 interface HomeViewProps {
@@ -144,8 +144,8 @@ const HomeView: React.FC<HomeViewProps> = ({
     <div className="h-full flex flex-col relative overflow-hidden transition-colors duration-1000">
       <div className="absolute inset-0 z-0" style={{ backgroundColor: activeTheme.bg }}>
         
-        {/* Wall Light Switch */}
-        <div className="absolute top-1/2 right-12 -translate-y-1/2 flex flex-col items-center gap-1 z-20">
+        {/* Wall Light Switch - Moved 20px more to the right (right-[18px] -> right-[-2px]) */}
+        <div className="absolute top-1/2 right-[-2px] -translate-y-1/2 flex flex-col items-center gap-1 z-20">
           <div 
             onClick={() => setLampOn(!lampOn)}
             className="w-10 h-16 bg-white rounded-lg border-2 border-gray-200 shadow-lg cursor-pointer flex flex-col p-1.5 transition-all active:scale-95"
@@ -216,7 +216,11 @@ const HomeView: React.FC<HomeViewProps> = ({
               <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-white px-3 py-1 rounded-full text-[10px] font-black text-[#3A215D] shadow-md border border-[#3A215D]/10 whitespace-nowrap">
                 {activeOrigami.name}: {Math.round(activeOrigami.health)}%
               </div>
-              <PaperAirplaneSVG className="w-40 h-40" />
+              {activeOrigami.health > 0 ? (
+                <PaperAirplaneSVG className="w-40 h-40" health={activeOrigami.health} mainColor={customization.origamiColor} />
+              ) : (
+                <CrumpledBallSVG className="w-40 h-40 grayscale opacity-80" />
+              )}
               <div className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-24 h-6 bg-black/20 blur-md rounded-full -z-10 transition-transform duration-700 ${underLamp ? 'scale-125 opacity-100' : 'scale-100 opacity-60'}`} />
             </div>
           </div>
@@ -245,7 +249,7 @@ const HomeView: React.FC<HomeViewProps> = ({
               className="bg-[#3A215D] px-4 py-2 rounded-full shadow-lg text-xs font-black text-white hover:scale-105 active:scale-95 transition-transform cursor-pointer h-10 flex items-center justify-center"
               disabled={activeOrigami.health <= 50}
             >
-               {activeOrigami.health > 50 ? foldMode : 'LOW LIFT'}
+               {activeOrigami.health > 50 ? foldMode : activeOrigami.health > 0 ? 'LOW LIFT' : 'CRUMPLED'}
             </button>
           </div>
         </div>

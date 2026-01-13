@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { OrigamiStats } from '../types';
-import { COLORS, PaperAirplaneSVG } from '../constants';
+import { COLORS, PaperAirplaneSVG, CrumpledBallSVG } from '../constants';
 
 interface ProfileViewProps {
   origami: OrigamiStats;
@@ -107,11 +107,17 @@ const ProfileView: React.FC<ProfileViewProps> = ({ origami }) => {
 
         <div className="flex gap-8 items-center mb-8">
           <div className="w-24 h-24 bg-[#FFC107]/10 rounded-3xl flex items-center justify-center p-2 border border-[#FFC107]/20 shadow-inner">
-             <PaperAirplaneSVG className="w-full h-full -rotate-12" />
+             {origami.health > 0 ? (
+               <PaperAirplaneSVG className="w-full h-full -rotate-12" health={origami.health} />
+             ) : (
+               <CrumpledBallSVG className="w-full h-full grayscale" />
+             )}
           </div>
           <div>
             <h1 className="text-2xl font-black text-[#3A215D] mb-1">{origami.name}</h1>
-            <p className="text-[#E65100] font-black text-[10px] uppercase tracking-widest">Mk. 2.5 Cruiser</p>
+            <p className="text-[#E65100] font-black text-[10px] uppercase tracking-widest">
+              {origami.health > 0 ? 'Mk. 2.5 Cruiser' : 'Crumpled Sheet'}
+            </p>
           </div>
         </div>
 
@@ -131,13 +137,15 @@ const ProfileView: React.FC<ProfileViewProps> = ({ origami }) => {
               </div>
               <div className="flex flex-col">
                   <span className="text-[9px] font-black uppercase tracking-widest text-gray-300 mb-1">Status</span>
-                  <span className="text-xl font-black text-[#3A215D]">{Math.round(origami.health)}% Lift</span>
+                  <span className={`text-xl font-black ${origami.health > 20 ? 'text-[#3A215D]' : 'text-red-500'}`}>
+                    {Math.round(origami.health)}% Integrity
+                  </span>
               </div>
               <div className="flex flex-col">
                   <span className="text-[9px] font-black uppercase tracking-widest text-gray-300 mb-1">Flight ID</span>
                   <div className="flex items-center gap-2 mt-1">
                     <div className="flex gap-1">
-                      {[...Array(6)].map((_, i) => <div key={i} className="w-1.5 h-1.5 rounded-full bg-gray-200" />)}
+                      {[...Array(6)].map((_, i) => <div key={i} className={`w-1.5 h-1.5 rounded-full ${origami.health > 0 ? 'bg-gray-200' : 'bg-red-200 animate-pulse'}`} />)}
                     </div>
                   </div>
               </div>
@@ -184,6 +192,13 @@ const ProfileView: React.FC<ProfileViewProps> = ({ origami }) => {
           TELEMETRY
         </button>
       </div>
+
+      {origami.health === 0 && (
+        <div className="bg-red-500 rounded-3xl p-6 flex flex-col items-center justify-center mb-8 shadow-xl text-white text-center">
+           <h4 className="text-lg font-black uppercase mb-1">Unit Terminated</h4>
+           <p className="text-[10px] opacity-80 uppercase tracking-widest">Folded beyond recovery. Sync to reset.</p>
+        </div>
+      )}
 
       <div className="bg-[#3A215D] rounded-3xl p-6 flex items-center justify-between mb-8 shadow-xl">
          <div className="flex items-center gap-5">

@@ -28,6 +28,8 @@ export interface SunlightData {
   stepGoal: number;
   sleepHours: number;
   sleepGoal: number;
+  screenTime: number; // Updated from focusHours
+  screenTimeGoal: number; // Updated from focusGoal
 }
 
 export interface CurrencyStats {
